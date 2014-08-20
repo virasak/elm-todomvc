@@ -14,7 +14,7 @@
 
 <body>
 <input ng-model="imagine"/>
-<div id="singleton" style="height: 1000px" elm module="Todo" ports-in="{getStorage: $storage.todoState}"></div>
+<div style="height: 1000px" elm module="Todo" ports-in="{getStorage: $storage.todoState}"></div>
 <script>
 var app = angular.module('Test', ['Elm', 'ngStorage']);
 app.run(function ($rootScope, $localStorage) {

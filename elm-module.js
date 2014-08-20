@@ -32,8 +32,8 @@
                          }
                      } else if (port.subscribe) {
                          port.subscribe(function (value) {
-                             console.log('emit', eventName(moduleName, portName), 'with', value);
-                             scope.$emit(eventName(moduleName, portName), value);
+                             console.log('emit', eventName(moduleName, portName), 'with', value, id);
+                             scope.$emit(eventName(moduleName, portName), value, id);
                          });
                      }
                  });
