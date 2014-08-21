@@ -1,5 +1,4 @@
 (function (ng, Elm) {
-    console.log('loading Elm module');
 
     ng.module('Elm', [])
         .directive('elm', function ($parse) {
@@ -12,6 +11,7 @@
                 var module     = Elm[moduleName];
                 var elm;
 
+
                 if (target.nodeName === 'BODY') {
                     // <body elm module="" ...></body>
                     elm = Elm.fullscreen(module, portsIn)
@@ -23,10 +23,8 @@
                     elm = Elm.embed(module, target, portsIn );
                 }
 
-                console.log('Ports', ports);
 
                 if (elm && ports) {
-                    console.log('set ports', scope);
                     ng.forEach (elm.ports, function(port, name) {
                         if (port.send) {
                             scope.$watch(ports + '.' + name, function(value) {
