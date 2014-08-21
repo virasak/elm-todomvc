@@ -2,40 +2,40 @@
 <html ng-app="Test">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Elm • TodoMVC</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular.min.js"></script>
-  <script src="http://elm-lang.org/elm-runtime.js"></script>
-  <script src="https://rawgithub.com/gsklee/ngStorage/master/ngStorage.js"></script>
-  <script src="elm-module.js"></script>
-  <script src="build/Todo.js"></script>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Elm • TodoMVC</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular.min.js"></script>
+    <script src="http://elm-lang.org/elm-runtime.js"></script>
+    <script src="https://rawgithub.com/gsklee/ngStorage/master/ngStorage.js"></script>
+    <script src="elm-module.js"></script>
+    <script src="build/Todo.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        var app = angular.module('Test', ['Elm', 'ngStorage']);
+
+        app.controller('Ctrl', function ($scope, $localStorage) {
+            console.log($scope);
+            $scope.$storage = $localStorage.$default({todoState: null });
+
+            $scope.todoPorts = {};
+            $scope.todoPorts.focus = function(selector) {
+                setTimeout(function() {
+                    var nodes = document.querySelectorAll(selector);
+                    if (nodes.length === 1 && document.activeElement !== nodes[0]) {
+                        nodes[0].focus();
+                    }
+                }, 50);
+            };
+
+            $scope.todoPorts.setStorage = function(state) {
+                $scope.$apply(function () {
+                    $scope.$storage.todoState  = state;
+                });
+            };
+        });
+    </script>
 </head>
 
-<body elm module="Todo" ports-in="{getStorage: $storage.todoState}">
-<script>
-var app = angular.module('Test', ['Elm', 'ngStorage']);
-app.run(function ($rootScope, $localStorage) {
-
-    $rootScope.$on('Elm.Todo.ports.focus', function (event, selector) {
-        console.log('on', event.name, 'with', selector);
-        setTimeout(function() {
-            var nodes = document.querySelectorAll(selector);
-            if (nodes.length === 1 && document.activeElement !== nodes[0]) {
-                nodes[0].focus()
-            }
-        }, 50);
-    });
-
-    $rootScope.$storage = $localStorage.$default({todoState: null });
-    $rootScope.$on('Elm.Todo.ports.setStorage', function (event, state) {
-        console.log('on', event.name, 'with', state);
-        $rootScope.$apply(function () {
-            $rootScope.$storage.todoState  = state;
-        });
-    });
-
-});
-</script>
+<body elm module="Todo" ports="todoPorts" ports-in="{getStorage: $storage.todoState}" ng-controller="Ctrl">
 </body>
 </html>

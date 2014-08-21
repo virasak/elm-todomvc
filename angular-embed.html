@@ -12,32 +12,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-<div style="height: 1000px" elm module="Todo" ports-in="{getStorage: $storage.todoState}"></div>
-<script>
-var app = angular.module('Test', ['Elm', 'ngStorage']);
-app.run(function ($rootScope, $localStorage) {
+<body ng-controller="Ctrl">
+    <div style="height: 1000px" elm module="Todo" ports-in="{getStorage: $storage.todoState}" ports="todoPorts"></div>
+    <script>
+        var app = angular.module('Test', ['Elm', 'ngStorage']);
 
-    $rootScope.$on('Elm.Todo.ports.focus', function (event, selector) {
-        console.log('on', event.name, 'with', selector);
-        setTimeout(function() {
-            var nodes = document.querySelectorAll(selector);
-            if (nodes.length === 1 && document.activeElement !== nodes[0]) {
-                nodes[0].focus()
-            }
-        }, 50);
-    });
 
-    $rootScope.$storage = $localStorage.$default({todoState: null });
-    $rootScope.$on('Elm.Todo.ports.setStorage', function (event, state) {
-        console.log('on', event.name, 'with', state);
-        $rootScope.$apply(function () {
-            $rootScope.$storage.todoState  = state;
+        app.controller('Ctrl', function ($scope, $localStorage) {
+            $scope.$storage = $localStorage.$default({todoState: null });
+
+            $scope.todoPorts = {};
+            $scope.todoPorts.focus = function(selector) {
+                setTimeout(function() {
+                    var nodes = document.querySelectorAll(selector);
+                    if (nodes.length === 1 && document.activeElement !== nodes[0]) {
+                        nodes[0].focus();
+                    }
+                },
+                50)
+            };
+
+            $scope.todoPorts.setStorage = function(state) {
+                $scope.$apply(function () {
+                    $scope.$storage.todoState  = state;
+                });
+            };
+
         });
-    });
-
-});
-</script>
+    </script>
 </body>
 </html>
 

@@ -1,54 +1,57 @@
 (function (ng, Elm) {
+    console.log('loading Elm module');
 
-   ng.module('Elm', [])
-       .directive('elm', function ($parse) {
-           function link(scope, element, attrs) {
-             var id         = attrs.id;
-             var target     = element[0];
-             var portsIn    = $parse(attrs.portsIn)(scope);
-             var moduleName = attrs.module;
-             var module     = Elm[moduleName];
-             var elm;
+    ng.module('Elm', [])
+        .directive('elm', function ($parse) {
+            function link(scope, element, attrs) {
+                var id         = attrs.id;
+                var target     = element[0];
+                var portsIn    = $parse(attrs.portsIn)(scope);
+                var ports      = attrs.ports;
+                var moduleName = attrs.module;
+                var module     = Elm[moduleName];
+                var elm;
 
-             if (target.nodeName === 'BODY') {
-                 elm = Elm.fullscreen(module, portsIn)
-             } else if (target.nodeName === 'ELM') {
-                 elm = Elm.worker(module, portsIn);
-             } else if (target.nodeName === 'DIV') {
-                 elm = Elm.embed(module, target, portsIn );
-             }
+                if (target.nodeName === 'BODY') {
+                    // <body elm module="" ...></body>
+                    elm = Elm.fullscreen(module, portsIn)
+                } else if (target.nodeName === 'ELM') {
+                    // <elm module="" ...></elm>
+                    elm = Elm.worker(module, portsIn);
+                } else if (target.nodeName === 'DIV') {
+                    // <div elm module="" ...></div>
+                    elm = Elm.embed(module, target, portsIn );
+                }
 
-             if (elm) {
-                 ng.forEach(elm.ports, function (port, portName) {
-                     if (port.send) {
-                         var send = function (event, value) {
-                             console.log('on', event.name, 'with', value);
-                             port.send(value);
-                         };
+                console.log('Ports', ports);
 
-                         scope.$on(eventName(moduleName, portName), send);
-                         if (id) {
-                             scope.$on(eventName(moduleName, portName + '#' + id), send);
-                         }
-                     } else if (port.subscribe) {
-                         port.subscribe(function (value) {
-                             console.log('emit', eventName(moduleName, portName), 'with', value, id);
-                             scope.$emit(eventName(moduleName, portName), value, id);
-                         });
-                     }
-                 });
-             }
-           };
+                if (elm && ports) {
+                    console.log('set ports', scope);
+                    ng.forEach (elm.ports, function(port, name) {
+                        if (port.send) {
+                            scope.$watch(ports + '.' + name, function(value) {
+                                if (value) {
+                                    port.send(value);
+                                }
+                            });
+                        } else if (port.subscribe) {
+                            scope.$watch(ports + '.' + name, function(newFn, oldFn) {
+                                if (ng.isFunction(oldFn)) {
+                                    port.unsubscribe(oldFn);
+                                }
+                                if (ng.isFunction(newFn)) {
+                                    port.subscribe(newFn);
+                                }
+                            });
+                        }
+                    });
+                }
+            };
 
-           return {
-             restrict: 'EA',
-             link: link
-           };
-       })
-    ;
-    var eventName = function (moduleName, portName) {
-       return 'Elm.' + moduleName + '.ports.' + portName;
-    };
-
- })(angular, Elm);
+            return {
+                restrict: 'EA',
+                    link: link
+            };
+        });
+})(angular, Elm);
 
